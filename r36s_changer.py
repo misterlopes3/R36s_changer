@@ -20,32 +20,43 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # ==========================================
 VERSAO_LOCAL = "1.3"
 
-# Variáveis globais limpas e estruturadas
+# Variáveis globais de conexão unificadas no topo do escopo
 URL_VERSAO_GITHUB = "https://raw.githubusercontent.com/misterlopes3/R36s_changer/main/versao.txt"
 URL_REPOSITORIO   = "https://github.com/misterlopes3/R36s_changer"
 
-# --- FUNÇÃO DE AUTO-UPDATE MANUAL ---
+# --- FUNÇÃO DE AUTO-UPDATE RESILIENTE ---
 def verificar_e_atualizar_app(silencioso=False):
     try:
-        resposta_v = requests.get(URL_VERSAO_GITHUB, timeout=10, verify=False)
+        # Usa corretamente a variável definida no topo do escopo (URL_VERSAO_GITHUB)
+        resposta_v = requests.get(URL_VERSAO_GITHUB, timeout=5, verify=False)
         
         if resposta_v.status_code != 200:
             if not silencioso:
                 messagebox.showerror("Erro", "Não foi possível conectar ao repositório para validar versões.")
             return
 
-        versao_remota = resposta_v.text.strip()
+        versao_remota_texto = resposta_v.text.strip()
 
-        if float(versao_remota) > float(VERSAO_LOCAL):
-            if messagebox.askyesno("Atualização Disponível", f"Uma nova versão ({versao_remota}) foi detetada no GitHub!\nDesejas abrir o repositório para descarregar o novo r36s_changer.py?"):
+        # Validação extra: se o conteúdo do ficheiro remoto vier vazio ou corrompido, evita que a app falhe
+        if not versao_remota_texto:
+            if not silencioso:
+                messagebox.showerror("Erro", "O ficheiro de versão remoto está vazio.")
+            return
+
+        # Limpa caracteres inesperados e valida a conversão para float de forma segura
+        versao_remota_limpa = re.sub(r'[^\d.]', '', versao_remota_texto)
+        
+        if float(versao_remota_limpa) > float(VERSAO_LOCAL):
+            if messagebox.askyesno("Atualização Disponível", f"Uma nova versão ({versao_remota_texto}) foi detetada no GitHub!\nDesejas abrir o repositório para descarregar o novo r36s_changer.py?"):
                 webbrowser.open(URL_REPOSITORIO)
         else:
             if not silencioso:
                 messagebox.showinfo("Atualizado", f"A tua aplicação está na versão mais recente (v{VERSAO_LOCAL}).")
                 
     except Exception as e:
+        # Se for o arranque silencioso, ignora em silêncio para deixar a app abrir normalmente
         if not silencioso:
-            messagebox.showerror("Erro", f"Erro ao verificar atualizações: {str(e)}")
+            messagebox.showerror("Erro na árvore de verificação", f"Erro ao verificar atualizações: {str(e)}")
 
 # --- DICIONÁRIO DE IDIOMAS ---
 IDIOMA_ATUAL = "PT"
@@ -517,7 +528,7 @@ combo_lang.bind("<<ComboboxSelected>>", mudar_idioma)
 
 tk.Label(frame_topo, text="Language:", bg="#11111b", fg="#a6adc8", font=("Segoe UI", 9)).pack(side="right", padx=(15, 5))
 
-btn_update_app = tk.Button(frame_topo, command=lambda: verificar_e_atualizar_app(silencioso=False), bg="#313244", fg="#89b4fa", activebackground="#45475a", activeforeground="white", font=("Segoe UI", 9, "bold"), relief="flat", bd=0, padx=12, pady=2)
+btn_update_app = tk.Button(frame_topo, text="🔄 Procurar Atualizações", command=lambda: verificar_e_atualizar_app(silencioso=False), bg="#313244", fg="#89b4fa", activebackground="#45475a", activeforeground="white", font=("Segoe UI", 9, "bold"), relief="flat", bd=0, padx=12, pady=2)
 btn_update_app.pack(side="right", padx=10)
 
 estilo = ttk.Style()
@@ -625,6 +636,9 @@ lbl_status_drivers = tk.Label(aba_drivers, font=("Segoe UI", 10, "italic"), bg="
 lbl_status_drivers.pack(pady=5)
 btn_aplicar_patch = tk.Button(aba_drivers, font=("Segoe UI", 11, "bold"), bg="#89b4fa", fg="#11111b", relief="flat", command=aplicar_patch_driver, height=2, bd=0)
 btn_aplicar_patch.pack(fill="x", padx=15, pady=(5, 15))
+
+# Executa a validação em background de forma silenciosa para não prender a interface
+verificar_e_atualizar_app(silencioso=True)
 
 mudar_idioma()
 root.mainloop()
