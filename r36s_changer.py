@@ -17,6 +17,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # --- CONFIGURAÇÃO DO AUTO-UPDATE ---
 VERSAO_ATUAL = "1.3"
 
+# Variáveis Globais de Identificação do GitHub
 GITHUB_USER = "misterlopes3"
 GITHUB_REPO = "R36s_changer"
 
@@ -362,7 +363,7 @@ def buscar_capas_online():
     lbl_status_jogos.config(text=t("status_concluido"), fg="#a6e3a1")
     atualizar_lista_jogos()
 
-# --- FUNÇÃO DE AUTO-UPDATE BASEADA NO GITHUB ---
+# --- FUNÇÃO DE AUTO-UPDATE BASEADA DO GITHUB ---
 def verificar_e_atualizar_app(silencioso=True):
     try:
         resposta_v = requests.get(URL_VERSAO_REMOTA, timeout=10, verify=False)
@@ -373,7 +374,6 @@ def verificar_e_atualizar_app(silencioso=True):
 
         versao_remota = resposta_v.text.strip()
 
-        # Compara as versões (ex: Remota "1.4" > Atual "1.3")
         if float(versao_remota) > float(VERSAO_ATUAL):
             if messagebox.askyesno("Atualização Disponível", f"Uma nova versão ({versao_remota}) foi detetada no GitHub!\nDesejas atualizar a aplicação automaticamente agora?"):
                 resposta_codigo = requests.get(URL_CODIGO_REMOTOS, timeout=20, verify=False)
@@ -387,7 +387,7 @@ def verificar_e_atualizar_app(silencioso=True):
                     with open(caminho_atual, "wb") as f:
                         f.write(resposta_codigo.content)
                         
-                    messagebox.showinfo(t("msg_sucesso"), "Aplicação atualizada com sucesso! A reiniciar...")
+                    messagebox.showinfo(t("msg_sucesso"), "Aplicação updated com sucesso! A reiniciar...")
                     os.execv(sys.executable, ['python'] + sys.argv)
                 else:
                     messagebox.showerror(t("msg_erro"), "Não foi possível descarregar o ficheiro de código remetido.")
@@ -607,31 +607,27 @@ btn_add_tema = tk.Button(frame_botoes_temas, bg="#a6e3a1", fg="#11111b", relief=
 btn_del_tema = tk.Button(frame_botoes_temas, bg="#f38ba8", fg="#11111b", relief="flat", font=("Segoe UI", 10, "bold"), command=remover_tema, width=25, bd=0); btn_del_tema.pack(side="left", padx=5)
 btn_refresh_temas = tk.Button(frame_botoes_temas, bg="#45475a", fg="white", relief="flat", font=("Segoe UI", 10, "bold"), command=atualizar_lista_temas, width=12, bd=0); btn_refresh_temas.pack(side="right", padx=5)
 
-# ABA 4 - DRIVERS DO ECRÃ
+# ABA 4 - DRIVERS ECRÃ
 aba_drivers = tk.Frame(abas, bg="#1e1e2e"); abas.add(aba_drivers, text="")
-lbl_tit_drv = tk.Label(aba_drivers, font=("Segoe UI", 16, "bold"), bg="#1e1e2e", fg="#cdd6f4"); lbl_tit_drv.pack(pady=(20, 5))
+lbl_tit_drv = tk.Label(aba_drivers, font=("Segoe UI", 14, "bold"), bg="#1e1e2e", fg="#cdd6f4"); lbl_tit_drv.pack(pady=(20, 5))
 lbl_sub_drv = tk.Label(aba_drivers, font=("Segoe UI", 10), bg="#1e1e2e", fg="#a6adc8"); lbl_sub_drv.pack(pady=(0, 15))
 
-frame_pasta_drv = tk.Frame(aba_drivers, bg="#252538"); frame_pasta_drv.pack(fill="x", padx=15, pady=10, ipady=6)
-lbl_pasta_drv = tk.Label(frame_pasta_drv, font=("Segoe UI", 10, "bold"), bg="#252538", fg="#cdd6f4"); lbl_pasta_drv.pack(side="left", padx=(15, 5))
-entrada_pasta_drv = tk.Entry(frame_pasta_drv, font=("Segoe UI", 10), width=45, bg="#313244", fg="white", relief="flat", bd=0)
-entrada_pasta_drv.pack(side="left", padx=5, ipady=4, fill="x", expand=True)
-btn_proc_pasta_drv = tk.Button(frame_pasta_drv, command=selecionar_pasta_drivers, bg="#45475a", fg="white", font=("Segoe UI", 10, "bold"), relief="flat", padx=15, bd=0)
-btn_proc_pasta_drv.pack(side="right", padx=15)
+frame_busca_drv = tk.Frame(aba_drivers, bg="#252538"); frame_busca_drv.pack(fill="x", padx=15, pady=10, ipady=6)
+lbl_pasta_drv = tk.Label(frame_busca_drv, font=("Segoe UI", 10, "bold"), bg="#252538", fg="#cdd6f4"); lbl_pasta_drv.pack(side="left", padx=(15, 5))
+entrada_pasta_drv = tk.Entry(frame_busca_drv, font=("Segoe UI", 10), width=45, bg="#313244", fg="white", relief="flat", bd=0); entrada_pasta_drv.pack(side="left", padx=5, ipady=4, fill="x", expand=True)
+btn_proc_pasta_drv = tk.Button(frame_busca_drv, command=selecionar_pasta_drivers, bg="#45475a", fg="white", font=("Segoe UI", 10, "bold"), relief="flat", padx=15, bd=0); btn_proc_pasta_drv.pack(side="right", padx=15)
 
-lbl_status_drivers = tk.Label(aba_drivers, font=("Segoe UI", 10, "italic"), bg="#1e1e2e", fg="#a6adc8"); lbl_status_drivers.pack(pady=(5, 5))
+lbl_status_drivers = tk.Label(aba_drivers, font=("Segoe UI", 10, "italic"), bg="#1e1e2e", fg="#a6adc8"); lbl_status_drivers.pack(pady=5)
 
 frame_tabela_drivers = tk.Frame(aba_drivers, bg="#1e1e2e"); frame_tabela_drivers.pack(pady=5, fill="both", expand=True, padx=15)
 lista_drivers = ttk.Treeview(frame_tabela_drivers, columns=("nome_patch",), show="headings")
-lista_drivers.column("nome_patch", width=800, anchor="w")
+lista_drivers.column("nome_patch", width=600, anchor="w")
 lista_drivers.pack(side="left", fill="both", expand=True)
 scroll_drivers = ttk.Scrollbar(frame_tabela_drivers, orient="vertical", command=lista_drivers.yview); lista_drivers.configure(yscrollcommand=scroll_drivers.set); scroll_drivers.pack(side="right", fill="y")
 
-frame_botoes_drivers = tk.Frame(aba_drivers, bg="#1e1e2e"); frame_botoes_drivers.pack(pady=15, fill="x", padx=15)
-btn_aplicar_patch = tk.Button(frame_botoes_drivers, bg="#89b4fa", fg="#11111b", relief="flat", font=("Segoe UI", 11, "bold"), command=aplicar_patch_driver, height=2, bd=0)
-btn_aplicar_patch.pack(fill="x", padx=5)
+btn_aplicar_patch = tk.Button(aba_drivers, font=("Segoe UI", 11, "bold"), bg="#89b4fa", fg="#11111b", relief="flat", command=aplicar_patch_driver, height=2, bd=0)
+btn_aplicar_patch.pack(pady=20, fill="x", padx=15)
 
-# Inicializar interface
+# Execução Inicial das Traduções e Loop Principal
 mudar_idioma()
-root.after(1000, lambda: verificar_e_atualizar_app(silencioso=True)) # Tenta update silencioso ao iniciar
 root.mainloop()
