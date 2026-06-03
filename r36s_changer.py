@@ -11,18 +11,43 @@ import psutil
 from PIL import Image, ImageTk, ImageDraw
 from fuzzywuzzy import process
 import urllib3
+import webbrowser
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-# --- CONFIGURAÇÃO DO AUTO-UPDATE ---
+# ==========================================
+# CONFIGURAÇÕES DE VERSÃO E REPOSITÓRIO
+# ==========================================
 VERSAO_ATUAL = "1.3"
+# O ficheiro versao.txt no GitHub serve para ler o texto da versão remota (ex: 1.3)
+URL_VERSAO_GITHUB = "https://raw.githubusercontent.com/misterlopes3/R36s_changer/main/versao.txt"
+# O repositório principal onde o utilizador vai descarregar o ficheiro novo se detetar update
+URL_REPOSITORIO = "https://github.com/misterlopes3/R36s_changer"
 
-# Variáveis Globais de Identificação do GitHub
-GITHUB_USER = "misterlopes3"
-GITHUB_REPO = "R36s_changer"
+# --- FUNÇÃO DE AUTO-UPDATE CORRIGIDA ---
+def verificar_e_atualizar_app(silencioso=True):
+    try:
+        # Faz o pedido usando a variável global correta
+        resposta_v = requests.get(URL_VERSAO_GITHUB, timeout=10, verify=False)
+        
+        if resposta_v.status_code != 200:
+            if not silencioso:
+                messagebox.showerror(t("msg_erro"), "Não foi possível conectar ao repositório para validar versões.")
+            return
 
-URL_VERSAO_REMOTA = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/versao.txt"
-URL_CODIGO_REMOTOS = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/assistente.py"
+        versao_remota = resposta_v.text.strip()
+
+        # Compara as versões transformando em float por segurança
+        if float(versao_remota) > float(VERSAO_ATUAL):
+            if messagebox.askyesno("Atualização Disponível", f"Uma nova versão ({versao_remota}) foi detetada no GitHub!\nDesejas abrir o repositório para descarregar o novo r36s_changer.py?"):
+                webbrowser.open(URL_REPOSITORIO)
+        else:
+            if not silencioso:
+                messagebox.showinfo("Atualizado", f"A tua aplicação está na versão mais recente (v{VERSAO_ATUAL}).")
+                
+    except Exception as e:
+        if not silencioso:
+            messagebox.showerror(t("msg_erro"), f"Erro ao verificar atualizações: {str(e)}")
 
 # --- DICIONÁRIO DE IDIOMAS ---
 IDIOMA_ATUAL = "PT"
@@ -30,10 +55,10 @@ IDIOMA_ATUAL = "PT"
 TEXTOS = {
     "PT": {
         "title": "Assistente Ultimate G80CA-MB V1.3 + Fixed Scraper",
-        "tab_logo": "  🖼️ Boot Logo  ",
-        "tab_jogos": "  🎮 Jogos e Capas  ",
-        "tab_temas": "  🎨 Temas ES  ",
-        "tab_drivers": "  🖥️ Drivers Ecrã  ",
+        "tab_logo": "  🖼️ Boot Logo   ",
+        "tab_jogos": "  🎮 Jogos e Capas   ",
+        "tab_temas": "  🎨 Temas ES   ",
+        "tab_drivers": "  🖥️ Drivers Ecrã   ",
         
         "logo_tit": "Altere o seu logo do seu R36s e diversos",
         "logo_sub": "Altere o splash screen estático que aparece ao ligar a consola portátil.",
@@ -89,10 +114,10 @@ TEXTOS = {
     },
     "EN": {
         "title": "Ultimate G80CA-MB V1.3 Assistant + Fixed Scraper",
-        "tab_logo": "  🖼️ Boot Logo  ",
-        "tab_jogos": "  🎮 Games & Covers  ",
-        "tab_temas": "  🎨 ES Themes  ",
-        "tab_drivers": "  🖥️ Screen Drivers  ",
+        "tab_logo": "  🖼️ Boot Logo   ",
+        "tab_jogos": "  🎮 Games & Covers   ",
+        "tab_temas": "  🎨 ES Themes   ",
+        "tab_drivers": "  🖥️ Screen Drivers   ",
         
         "logo_tit": "Boot Customizer (G80CA-MB V1.3)",
         "logo_sub": "Change the static splash screen that appears when turning on the handheld.",
@@ -111,7 +136,7 @@ TEXTOS = {
         "btn_add_jogo": "✨ Add Game",
         "btn_add_arte": "🖼️ Manual Cover",
         "btn_del_jogo": "🗑️ Remove Game",
-        "btn_atualizar": "🔄 Refresh",
+        "btn_refresh": "🔄 Refresh",
         
         "status_temas": "Waiting for connection...",
         "col_tema": "Installed Theme",
@@ -132,7 +157,7 @@ TEXTOS = {
         "msg_aviso": "Warning",
         "msg_logo_ok": "Your new Logo was written successfully!",
         "msg_sel_img": "Select the image and check the SD card!",
-        "status_scraper_conn": "🌐 Connecting to official Libretro repository...",
+        "status_scraper_conn": "Connecting to official Libretro repository...",
         "status_nenhum_sis": "ℹ️ No system selected.",
         "status_sd_erro": "⚠️ EASYROMS/BOOT card not detected.",
         "capa_ativa": "✦ Active",
@@ -193,14 +218,14 @@ def mudar_idioma(event=None):
     btn_add_jogo.config(text=t("btn_add_jogo"))
     btn_add_arte.config(text=t("btn_add_arte"))
     btn_del_jogo.config(text=t("btn_del_jogo"))
-    btn_atualizar.config(text=t("btn_atualizar"))
+    btn_atualizar.config(text=t("btn_atualizar") if IDIOMA_ATUAL == "PT" else t("btn_refresh"))
     
     lbl_status_temas.config(text=t("status_temas"))
     lista_temas.heading("nome_tema", text=t("col_tema"))
     lista_temas.heading("status_tema", text=t("col_status_tema"))
     btn_add_tema.config(text=t("btn_add_tema"))
     btn_del_tema.config(text=t("btn_del_tema"))
-    btn_refresh_temas.config(text=t("btn_atualizar"))
+    btn_refresh_temas.config(text=t("btn_atualizar") if IDIOMA_ATUAL == "PT" else t("btn_refresh"))
     
     lbl_tit_drv.config(text=t("drv_tit"))
     lbl_sub_drv.config(text=t("drv_sub"))
@@ -363,41 +388,6 @@ def buscar_capas_online():
     lbl_status_jogos.config(text=t("status_concluido"), fg="#a6e3a1")
     atualizar_lista_jogos()
 
-# --- FUNÇÃO DE AUTO-UPDATE BASEADA DO GITHUB ---
-def verificar_e_atualizar_app(silencioso=True):
-    try:
-        resposta_v = requests.get(URL_VERSAO_REMOTA, timeout=10, verify=False)
-        if resposta_v.status_code != 200:
-            if not silencioso:
-                messagebox.showerror(t("msg_erro"), "Não foi possível conectar ao repositório para validar versões.")
-            return
-
-        versao_remota = resposta_v.text.strip()
-
-        if float(versao_remota) > float(VERSAO_ATUAL):
-            if messagebox.askyesno("Atualização Disponível", f"Uma nova versão ({versao_remota}) foi detetada no GitHub!\nDesejas atualizar a aplicação automaticamente agora?"):
-                resposta_codigo = requests.get(URL_CODIGO_REMOTOS, timeout=20, verify=False)
-                if resposta_codigo.status_code == 200:
-                    caminho_atual = os.path.realpath(sys.argv[0])
-                    
-                    # Backup local preventivo
-                    shutil.copy(caminho_atual, caminho_atual + ".bak")
-                    
-                    # Sobrescreve com o novo código do GitHub
-                    with open(caminho_atual, "wb") as f:
-                        f.write(resposta_codigo.content)
-                        
-                    messagebox.showinfo(t("msg_sucesso"), "Aplicação updated com sucesso! A reiniciar...")
-                    os.execv(sys.executable, ['python'] + sys.argv)
-                else:
-                    messagebox.showerror(t("msg_erro"), "Não foi possível descarregar o ficheiro de código remetido.")
-        else:
-            if not silencioso:
-                messagebox.showinfo("Atualizado", f"A tua aplicação está na versão mais recente ({VERSAO_ATUAL}).")
-    except Exception as e:
-        if not silencioso:
-            messagebox.showerror(t("msg_erro"), f"Erro na árvore de verificação: {str(e)}")
-
 def adicionar_jogo():
     caminhos = filedialog.askopenfilenames(title=t("btn_add_jogo"))
     if caminhos:
@@ -512,7 +502,7 @@ root = tk.Tk()
 root.geometry("1060x680")
 root.config(bg="#11111b")
 
-# TOP FRAME COM IDIOMA E NOVO BOTÃO DE UPDATE
+# TOP FRAME COM IDIOMA E BOTÃO DE UPDATE
 frame_topo = tk.Frame(root, bg="#11111b")
 frame_topo.pack(fill="x", padx=15, pady=(10, 0))
 
@@ -523,7 +513,6 @@ combo_lang.bind("<<ComboboxSelected>>", mudar_idioma)
 
 tk.Label(frame_topo, text="Language:", bg="#11111b", fg="#a6adc8", font=("Segoe UI", 9)).pack(side="right", padx=(15, 5))
 
-# Botão Injetado para Tratar Atualizações
 btn_update_app = tk.Button(frame_topo, command=lambda: verificar_e_atualizar_app(silencioso=False), bg="#313244", fg="#89b4fa", activebackground="#45475a", activeforeground="white", font=("Segoe UI", 9, "bold"), relief="flat", bd=0, padx=12, pady=2)
 btn_update_app.pack(side="right", padx=10)
 
@@ -591,43 +580,46 @@ frame_botoes = tk.Frame(aba_jogos, bg="#1e1e2e"); frame_botoes.pack(pady=15, fil
 btn_add_jogo = tk.Button(frame_botoes, bg="#a6e3a1", fg="#11111b", relief="flat", font=("Segoe UI", 10, "bold"), command=adicionar_jogo, width=16, bd=0); btn_add_jogo.pack(side="left", padx=5)
 btn_add_arte = tk.Button(frame_botoes, bg="#74c7ec", fg="#11111b", relief="flat", font=("Segoe UI", 10, "bold"), command=adicionar_arte_manual, width=16, bd=0); btn_add_arte.pack(side="left", padx=5)
 btn_del_jogo = tk.Button(frame_botoes, bg="#f38ba8", fg="#11111b", relief="flat", font=("Segoe UI", 10, "bold"), command=remover_jogo, width=16, bd=0); btn_del_jogo.pack(side="left", padx=5)
-btn_atualizar = tk.Button(frame_botoes, bg="#45475a", fg="white", relief="flat", font=("Segoe UI", 10, "bold"), command=atualizar_lista_jogos, width=12, bd=0); btn_atualizar.pack(side="right", padx=5)
+btn_atualizar = tk.Button(frame_botoes, bg="#45475a", fg="white", relief="flat", font=("Segoe UI", 10, "bold"), command=atualizar_lista_jogos, width=16, bd=0); btn_atualizar.pack(side="right", padx=5)
 
-# ABA 3 - TEMAS
+# ABA 3 - TEMAS ES
 aba_temas = tk.Frame(abas, bg="#1e1e2e"); abas.add(aba_temas, text="")
-lbl_status_temas = tk.Label(aba_temas, font=("Segoe UI", 10, "italic"), bg="#1e1e2e", fg="#a6adc8"); lbl_status_temas.pack(pady=15)
-frame_tabela_temas = tk.Frame(aba_temas, bg="#1e1e2e"); frame_tabela_temas.pack(pady=5, fill="both", expand=True, padx=15)
+lbl_status_temas = tk.Label(aba_temas, font=("Segoe UI", 10, "italic"), bg="#1e1e2e", fg="#a6adc8"); lbl_status_temas.pack(pady=10)
+
+frame_tabela_temas = tk.Frame(aba_temas, bg="#1e1e2e"); frame_tabela_temas.pack(fill="both", expand=True, padx=15, pady=5)
 lista_temas = ttk.Treeview(frame_tabela_temas, columns=("nome_tema", "status_tema"), show="headings")
-lista_temas.column("nome_tema", width=420, anchor="w"); lista_temas.column("status_tema", width=160, anchor="center")
+lista_temas.column("nome_tema", width=400, anchor="w"); lista_temas.column("status_tema", width=200, anchor="center")
 lista_temas.pack(side="left", fill="both", expand=True)
 scroll_temas = ttk.Scrollbar(frame_tabela_temas, orient="vertical", command=lista_temas.yview); lista_temas.configure(yscrollcommand=scroll_temas.set); scroll_temas.pack(side="right", fill="y")
 
-frame_botoes_temas = tk.Frame(aba_temas, bg="#1e1e2e"); frame_botoes_temas.pack(pady=20, fill="x", padx=15)
-btn_add_tema = tk.Button(frame_botoes_temas, bg="#a6e3a1", fg="#11111b", relief="flat", font=("Segoe UI", 10, "bold"), command=adicionar_tema_zip, width=25, bd=0); btn_add_tema.pack(side="left", padx=5)
-btn_del_tema = tk.Button(frame_botoes_temas, bg="#f38ba8", fg="#11111b", relief="flat", font=("Segoe UI", 10, "bold"), command=remover_tema, width=25, bd=0); btn_del_tema.pack(side="left", padx=5)
-btn_refresh_temas = tk.Button(frame_botoes_temas, bg="#45475a", fg="white", relief="flat", font=("Segoe UI", 10, "bold"), command=atualizar_lista_temas, width=12, bd=0); btn_refresh_temas.pack(side="right", padx=5)
+frame_botoes_temas = tk.Frame(aba_temas, bg="#1e1e2e"); frame_botoes_temas.pack(pady=15, fill="x", padx=15)
+btn_add_tema = tk.Button(frame_botoes_temas, bg="#a6e3a1", fg="#11111b", relief="flat", font=("Segoe UI", 10, "bold"), command=adicionar_tema_zip, width=24, bd=0); btn_add_tema.pack(side="left", padx=5)
+btn_del_tema = tk.Button(frame_botoes_temas, bg="#f38ba8", fg="#11111b", relief="flat", font=("Segoe UI", 10, "bold"), command=remover_tema, width=24, bd=0); btn_del_tema.pack(side="left", padx=5)
+btn_refresh_temas = tk.Button(frame_botoes_temas, bg="#45475a", fg="white", relief="flat", font=("Segoe UI", 10, "bold"), command=atualizar_lista_temas, width=16, bd=0); btn_refresh_temas.pack(side="right", padx=5)
 
 # ABA 4 - DRIVERS ECRÃ
 aba_drivers = tk.Frame(abas, bg="#1e1e2e"); abas.add(aba_drivers, text="")
-lbl_tit_drv = tk.Label(aba_drivers, font=("Segoe UI", 14, "bold"), bg="#1e1e2e", fg="#cdd6f4"); lbl_tit_drv.pack(pady=(20, 5))
-lbl_sub_drv = tk.Label(aba_drivers, font=("Segoe UI", 10), bg="#1e1e2e", fg="#a6adc8"); lbl_sub_drv.pack(pady=(0, 15))
+lbl_tit_drv = tk.Label(aba_drivers, font=("Segoe UI", 15, "bold"), bg="#1e1e2e", fg="#cdd6f4"); lbl_tit_drv.pack(pady=(20, 5))
+lbl_sub_drv = tk.Label(aba_drivers, font=("Segoe UI", 10), bg="#1e1e2e", fg="#a6adc8"); lbl_sub_drv.pack(pady=(0, 20))
 
-frame_busca_drv = tk.Frame(aba_drivers, bg="#252538"); frame_busca_drv.pack(fill="x", padx=15, pady=10, ipady=6)
-lbl_pasta_drv = tk.Label(frame_busca_drv, font=("Segoe UI", 10, "bold"), bg="#252538", fg="#cdd6f4"); lbl_pasta_drv.pack(side="left", padx=(15, 5))
-entrada_pasta_drv = tk.Entry(frame_busca_drv, font=("Segoe UI", 10), width=45, bg="#313244", fg="white", relief="flat", bd=0); entrada_pasta_drv.pack(side="left", padx=5, ipady=4, fill="x", expand=True)
-btn_proc_pasta_drv = tk.Button(frame_busca_drv, command=selecionar_pasta_drivers, bg="#45475a", fg="white", font=("Segoe UI", 10, "bold"), relief="flat", padx=15, bd=0); btn_proc_pasta_drv.pack(side="right", padx=15)
+frame_busca_drv = tk.Frame(aba_drivers, bg="#1e1e2e"); frame_busca_drv.pack(fill="x", padx=15, pady=5)
+lbl_pasta_drv = tk.Label(frame_busca_drv, font=("Segoe UI", 10, "bold"), bg="#1e1e2e", fg="#cdd6f4"); lbl_pasta_drv.pack(side="left", padx=5)
+entrada_pasta_drv = tk.Entry(frame_busca_drv, font=("Segoe UI", 10), width=50, bg="#313244", fg="white", relief="flat", bd=0)
+entrada_pasta_drv.pack(side="left", padx=5, ipady=5, fill="x", expand=True)
+btn_proc_pasta_drv = tk.Button(frame_busca_drv, command=selecionar_pasta_drivers, bg="#45475a", fg="white", font=("Segoe UI", 10, "bold"), relief="flat", padx=15, bd=0)
+btn_proc_pasta_drv.pack(side="left", padx=5, ipady=3)
 
-lbl_status_drivers = tk.Label(aba_drivers, font=("Segoe UI", 10, "italic"), bg="#1e1e2e", fg="#a6adc8"); lbl_status_drivers.pack(pady=5)
-
-frame_tabela_drivers = tk.Frame(aba_drivers, bg="#1e1e2e"); frame_tabela_drivers.pack(pady=5, fill="both", expand=True, padx=15)
+frame_tabela_drivers = tk.Frame(aba_drivers, bg="#1e1e2e"); frame_tabela_drivers.pack(fill="both", expand=True, padx=15, pady=10)
 lista_drivers = ttk.Treeview(frame_tabela_drivers, columns=("nome_patch",), show="headings")
 lista_drivers.column("nome_patch", width=600, anchor="w")
 lista_drivers.pack(side="left", fill="both", expand=True)
 scroll_drivers = ttk.Scrollbar(frame_tabela_drivers, orient="vertical", command=lista_drivers.yview); lista_drivers.configure(yscrollcommand=scroll_drivers.set); scroll_drivers.pack(side="right", fill="y")
 
-btn_aplicar_patch = tk.Button(aba_drivers, font=("Segoe UI", 11, "bold"), bg="#89b4fa", fg="#11111b", relief="flat", command=aplicar_patch_driver, height=2, bd=0)
-btn_aplicar_patch.pack(pady=20, fill="x", padx=15)
+lbl_status_drivers = tk.Label(aba_drivers, font=("Segoe UI", 10, "italic"), bg="#1e1e2e", fg="#a6adc8"); lbl_status_drivers.pack(pady=5)
+btn_aplicar_patch = tk.Button(aba_drivers, font=("Segoe UI", 11, "bold"), bg="#f9e2af", fg="#11111b", relief="flat", command=aplicar_patch_driver, height=2, bd=0)
+btn_aplicar_patch.pack(pady=15, fill="x", padx=15)
 
-# Execução Inicial das Traduções e Loop Principal
+# Inicializa as strings corretas de acordo com o idioma padrão
 mudar_idioma()
+
 root.mainloop()
