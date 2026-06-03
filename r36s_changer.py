@@ -20,14 +20,13 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # ==========================================
 VERSAO_LOCAL = "1.3"
 
-# Variáveis globais de conexão unificadas no topo do escopo
 URL_VERSAO_GITHUB = "https://raw.githubusercontent.com/misterlopes3/R36s_changer/main/versao.txt"
 URL_REPOSITORIO   = "https://github.com/misterlopes3/R36s_changer"
 
 # --- FUNÇÃO DE AUTO-UPDATE RESILIENTE ---
 def verificar_e_atualizar_app(silencioso=False):
     try:
-        # Usa corretamente a variável definida no topo do escopo (URL_VERSAO_GITHUB)
+        # Nota: Agora usa a variável correta definida no topo: URL_VERSAO_GITHUB
         resposta_v = requests.get(URL_VERSAO_GITHUB, timeout=5, verify=False)
         
         if resposta_v.status_code != 200:
@@ -37,15 +36,15 @@ def verificar_e_atualizar_app(silencioso=False):
 
         versao_remota_texto = resposta_v.text.strip()
 
-        # Validação extra: se o conteúdo do ficheiro remoto vier vazio ou corrompido, evita que a app falhe
+        # Evita a falha caso o ficheiro remoto venha em branco
         if not versao_remota_texto:
             if not silencioso:
                 messagebox.showerror("Erro", "O ficheiro de versão remoto está vazio.")
             return
 
-        # Limpa caracteres inesperados e valida a conversão para float de forma segura
+        # Limpa potenciais espaços ou caracteres invisíveis antes de converter para float
         versao_remota_limpa = re.sub(r'[^\d.]', '', versao_remota_texto)
-        
+
         if float(versao_remota_limpa) > float(VERSAO_LOCAL):
             if messagebox.askyesno("Atualização Disponível", f"Uma nova versão ({versao_remota_texto}) foi detetada no GitHub!\nDesejas abrir o repositório para descarregar o novo r36s_changer.py?"):
                 webbrowser.open(URL_REPOSITORIO)
@@ -54,7 +53,7 @@ def verificar_e_atualizar_app(silencioso=False):
                 messagebox.showinfo("Atualizado", f"A tua aplicação está na versão mais recente (v{VERSAO_LOCAL}).")
                 
     except Exception as e:
-        # Se for o arranque silencioso, ignora em silêncio para deixar a app abrir normalmente
+        # No arranque automático (silencioso=True), não incomoda o utilizador com pop-ups se falhar
         if not silencioso:
             messagebox.showerror("Erro na árvore de verificação", f"Erro ao verificar atualizações: {str(e)}")
 
