@@ -16,9 +16,9 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # --- CONFIGURAÇÃO DO AUTO-UPDATE ---
 VERSAO_ATUAL = "1.3"
-# ⚠️ IMPORTANTE: Substitui 'MIGUEL_LOPES' e 'R36S_ASSISTANT_REPO' pelos teus dados reais do GitHub
-GITHUB_USER = "MIGUEL_LOPES"
-GITHUB_REPO = "R36S_ASSISTANT_REPO"
+
+GITHUB_USER = "misterlopes3"
+GITHUB_REPO = "R36s_changer"
 
 URL_VERSAO_REMOTA = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/versao.txt"
 URL_CODIGO_REMOTOS = f"https://raw.githubusercontent.com/{GITHUB_USER}/{GITHUB_REPO}/main/assistente.py"
