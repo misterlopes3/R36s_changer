@@ -18,7 +18,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # ==========================================
 # CONFIGURAÇÕES DE VERSÃO E REPOSITÓRIO
 # ==========================================
-VERSAO_LOCAL = "1.3"
+VERSAO_LOCAL = "1.4"
 
 URL_VERSAO_GITHUB = "https://raw.githubusercontent.com/misterlopes3/R36s_changer/main/versao.txt"
 URL_REPOSITORIO   = "https://github.com/misterlopes3/R36s_changer"
