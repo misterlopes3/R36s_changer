@@ -18,7 +18,14 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # ==========================================
 # CONFIGURAÇÕES DE VERSÃO E REPOSITÓRIO
 # ==========================================
-VERSAO_LOCAL = "1.4"
+def obter_versao_local():
+    # Se quiseres guardar localmente, podes ler de um ficheiro versao.txt local
+    if os.path.exists("versao.txt"):
+        with open("versao.txt", "r") as f:
+            return float(f.read().strip())
+    return 1.3 # Versão inicial se não existir o ficheiro
+
+VERSAO_LOCAL = obter_versao_local()
 
 URL_VERSAO_GITHUB = "https://raw.githubusercontent.com/misterlopes3/R36s_changer/main/versao.txt"
 URL_REPOSITORIO   = "https://github.com/misterlopes3/R36s_changer"
